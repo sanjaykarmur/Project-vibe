@@ -6,111 +6,101 @@
 <title>Vibe Player</title>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  font-family: system-ui;
-  background: #0d0d0d;
-  color: white;
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:system-ui;
+  background:#0d0d0d;
+  color:white;
 }
 
-/* TOP SECTION */
-.top {
-  padding: 20px;
-}
+/* CONTAINER */
+.container{padding:20px;}
 
-/* ALBUM ART */
-.art {
-  width: 100%;
-  height: 300px;
-  border-radius: 25px;
-  background: linear-gradient(145deg,#1db954,#0d0d0d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 50px;
-  box-shadow: 0 10px 40px rgba(0,255,150,0.3);
+/* ART */
+.art{
+  width:100%;
+  height:300px;
+  border-radius:25px;
+  background:linear-gradient(145deg,#1db954,#0d0d0d);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:50px;
+  box-shadow:0 10px 40px rgba(0,255,150,0.3);
 }
 
 /* TITLE */
-.title {
-  margin-top: 15px;
-  font-size: 20px;
-  font-weight: 600;
+.title{
+  margin-top:15px;
+  font-size:18px;
 }
 
-/* FILE PICKER */
-.upload {
-  margin-top: 15px;
+/* FILE */
+.upload{
+  margin-top:15px;
 }
-.upload label {
-  display: block;
-  background: rgba(255,255,255,0.05);
-  padding: 14px;
-  border-radius: 15px;
-  text-align: center;
-  backdrop-filter: blur(10px);
+.upload label{
+  display:block;
+  padding:14px;
+  border-radius:15px;
+  background:#1f1f1f;
+  text-align:center;
 }
-.upload input { display: none; }
+.upload input{display:none;}
 
 /* PROGRESS */
-.progress {
-  width: 100%;
-  margin-top: 20px;
+.progress{
+  width:100%;
+  margin-top:20px;
 }
 
 /* CONTROLS */
-.controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 25px;
-  margin-top: 25px;
+.controls{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:25px;
+  margin-top:25px;
 }
-
-.btn {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+.btn{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:#222;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
 }
-
-.play {
-  width: 80px;
-  height: 80px;
-  background: #1db954;
-  color: black;
-  font-size: 28px;
+.play{
+  width:80px;
+  height:80px;
+  background:#1db954;
+  color:black;
+  font-size:28px;
 }
 
 /* TOGGLE */
-.setting {
-  margin-top: 25px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.setting{
+  margin-top:25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-
-.switch {
-  position: relative;
-  width: 52px;
-  height: 28px;
+.switch{
+  position:relative;
+  width:52px;
+  height:28px;
 }
-.switch input { display: none; }
-
-.slider {
-  position: absolute;
-  background: #444;
-  border-radius: 30px;
-  top:0;left:0;right:0;bottom:0;
+.switch input{display:none;}
+.slider{
+  position:absolute;
+  background:#444;
+  border-radius:30px;
+  inset:0;
 }
-.slider:before {
+.slider:before{
   content:"";
   position:absolute;
   width:22px;height:22px;
@@ -119,33 +109,91 @@ body {
   border-radius:50%;
   transition:0.3s;
 }
+input:checked + .slider{background:#1db954;}
+input:checked + .slider:before{transform:translateX(24px);}
 
-input:checked + .slider {
+/* VISUAL */
+canvas{
+  width:100%;
+  height:120px;
+  margin-top:20px;
+}
+
+/* POPUP */
+#popup{
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.8);
+  display:flex; align-items:center; justify-content:center;
+  z-index:999;
+}
+.popup-box{
+  width:90%;
+  background:#1a1a1a;
+  padding:20px;
+  border-radius:20px;
+}
+.popup-buttons{
+  display:flex;
+  gap:4%;
+  margin-top:15px;
+}
+.popup-buttons button{
+  width:48%;
+  padding:12px;
+}
+.answer-grid{
+  display:grid;
+  gap:10px;
+}
+.continue{
+  width:100%;
+  margin-top:15px;
+  padding:14px;
   background:#1db954;
-}
-input:checked + .slider:before {
-  transform: translateX(24px);
-}
-
-/* VISUALIZER */
-canvas {
-  width: 100%;
-  height: 120px;
-  margin-top: 20px;
-}
-
-/* BOTTOM SAFE SPACE */
-.bottom-space {
-  height: 30px;
+  border:none;
+  border-radius:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="top">
+<!-- POPUP -->
+<div id="popup">
+  <div class="popup-box">
 
-  <div class="art" id="art">🎵</div>
+    <div id="step1">
+      <h3>Check Haptic Support</h3>
+      <p>Do you want to test your phone's vibration?</p>
+
+      <div class="popup-buttons">
+        <button onclick="closePopup()">No, thanks</button>
+        <button onclick="startTest()">Check</button>
+      </div>
+    </div>
+
+    <div id="step2" style="display:none;">
+      <p>How many times did you feel vibrations?</p>
+
+      <div class="answer-grid">
+        <button onclick="answer(0)">None</button>
+        <button onclick="answer(1)">1</button>
+        <button onclick="answer(2)">2</button>
+        <button onclick="answer(3)">3</button>
+      </div>
+
+      <p id="result" style="margin-top:10px;"></p>
+
+      <button class="continue" onclick="closePopup()">Continue</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <div class="art">🎵</div>
 
   <div class="title" id="title">Select a track</div>
 
@@ -174,57 +222,49 @@ canvas {
 
   <canvas id="viz"></canvas>
 
-  <div class="bottom-space"></div>
-
 </div>
 
 <audio id="audio"></audio>
 
 <script>
-let audio = document.getElementById("audio");
-let playBtn = document.getElementById("playBtn");
-let progress = document.getElementById("progress");
-let vibe = document.getElementById("vibe");
-let lastBeat = 0;
-  
-let ctx, analyser, dataArray;
-let audioCtx;
-let playing = false;
+let audio=document.getElementById("audio");
+let playBtn=document.getElementById("playBtn");
+let progress=document.getElementById("progress");
+let vibe=document.getElementById("vibe");
+
+let analyser,dataArray,audioCtx;
+let playing=false;
 
 /* FILE */
-document.getElementById("file").addEventListener("change", e => {
-  let file = e.target.files[0];
-  if (!file) return;
-
-  audio.src = URL.createObjectURL(file);
-  document.getElementById("title").innerText = file.name;
+document.getElementById("file").addEventListener("change",e=>{
+  let file=e.target.files[0];
+  if(!file)return;
+  audio.src=URL.createObjectURL(file);
+  document.getElementById("title").innerText=file.name;
 });
 
 /* SETUP */
 function setup(){
-  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  analyser = audioCtx.createAnalyser();
-
-  let src = audioCtx.createMediaElementSource(audio);
+  audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  analyser=audioCtx.createAnalyser();
+  let src=audioCtx.createMediaElementSource(audio);
   src.connect(analyser);
   analyser.connect(audioCtx.destination);
-
-  analyser.fftSize = 128;
-  dataArray = new Uint8Array(analyser.frequencyBinCount);
+  analyser.fftSize=128;
+  dataArray=new Uint8Array(analyser.frequencyBinCount);
 }
 
 /* PLAY */
 function togglePlay(){
-  if(!audio.src) return;
-
-  if(!audioCtx) setup();
+  if(!audio.src)return;
+  if(!audioCtx)setup();
 
   if(audio.paused){
     audio.play();
     playBtn.innerText="❚❚";
     playing=true;
     loop();
-  } else {
+  }else{
     audio.pause();
     playBtn.innerText="▶";
     playing=false;
@@ -232,24 +272,47 @@ function togglePlay(){
 }
 
 /* SEEK */
-function seek(s){ audio.currentTime+=s; }
+function seek(s){audio.currentTime+=s;}
 
 /* PROGRESS */
 audio.ontimeupdate=()=>{
   progress.value=(audio.currentTime/audio.duration)*100||0;
 };
-
 progress.oninput=()=>{
   audio.currentTime=(progress.value/100)*audio.duration;
 };
 
-/* VISUAL + VIBRATION */
+/* POPUP */
+function closePopup(){
+  document.getElementById("popup").style.display="none";
+}
+function startTest(){
+  document.getElementById("step1").style.display="none";
+  document.getElementById("step2").style.display="block";
+  if(navigator.vibrate){
+    navigator.vibrate([300,150,300]);
+  }
+}
+function answer(val){
+  let msg="";
+  if(val===0) msg="Your device does not support vibration API";
+  else if(val===1) msg="Vibration API working but not accurate";
+  else if(val===2) msg="Vibration API is working fine";
+  else msg="Inconsistent vibration detected";
+  document.getElementById("result").innerText=msg;
+}
+
+/* VISUAL + ADAPTIVE VIBRATION */
 const canvas=document.getElementById("viz");
 const c=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 
+let lastBeat=0;
+let prevBass=0;
+let smoothBass=0;
+
 function loop(){
-  if(!playing) return;
+  if(!playing)return;
 
   requestAnimationFrame(loop);
 
@@ -257,54 +320,35 @@ function loop(){
   c.clearRect(0,0,canvas.width,120);
 
   let w=canvas.width/dataArray.length;
-  let sum=0;
+  let bass=0;
 
-  for(let i=0;i<dataArray.length;i++){
+  for(let i=0;i<20;i++){
+    bass+=dataArray[i];
     let v=dataArray[i];
-    sum+=v;
     c.fillStyle=`rgb(${v},200,150)`;
     c.fillRect(i*w,120-v,w-2,v);
   }
 
-let threshold = 160; // adjust sensitivity
+  bass/=20;
 
-function loop(){
-  if(!playing) return;
+  smoothBass = smoothBass*0.7 + bass*0.3;
 
-  requestAnimationFrame(loop);
+  let delta = smoothBass - prevBass;
+  let threshold = 18 + smoothBass*0.05;
 
-  analyser.getByteFrequencyData(dataArray);
-  c.clearRect(0,0,canvas.width,120);
+  let now = performance.now();
 
-  let w = canvas.width / dataArray.length;
-
-  // 🎨 draw bars
-  for(let i=0;i<dataArray.length;i++){
-    let v = dataArray[i];
-    c.fillStyle = `rgb(${v},200,150)`;
-    c.fillRect(i*w,120-v,w-2,v);
-  }
-
-  // 🎧 BASS DETECTION (first ~20 bins = low freq)
-  let bass = 0;
-  for(let i = 0; i < 20; i++){
-    bass += dataArray[i];
-  }
-  bass = bass / 20;
-
-  let now = Date.now();
-
-  // 🔥 BEAT DETECTION (spike + cooldown)
-  if (
+  if(
     vibe.checked &&
     navigator.vibrate &&
-    bass > threshold &&
-    now - lastBeat > 120   // cooldown (ms)
-  ) {
-    navigator.vibrate(60); // short punch vibration
+    delta > threshold &&
+    now - lastBeat > 80
+  ){
+    navigator.vibrate(45);
     lastBeat = now;
   }
-}
+
+  prevBass = smoothBass;
 }
 </script>
 
