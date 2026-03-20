@@ -2,83 +2,57 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vibe Player</title>
 
 <style>
+* { box-sizing: border-box; }
+
 body {
   margin: 0;
   font-family: system-ui;
-  background: #121212;
+  background: #0d0d0d;
   color: white;
 }
 
-/* MAIN CONTAINER */
-.container {
-  padding: 15px;
+/* TOP SECTION */
+.top {
+  padding: 20px;
 }
 
 /* ALBUM ART */
 .art {
   width: 100%;
-  height: 280px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #1db954, #191414);
+  height: 300px;
+  border-radius: 25px;
+  background: linear-gradient(145deg,#1db954,#0d0d0d);
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 40px;
+  justify-content: center;
+  font-size: 50px;
+  box-shadow: 0 10px 40px rgba(0,255,150,0.3);
 }
 
 /* TITLE */
 .title {
   margin-top: 15px;
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 600;
 }
 
 /* FILE PICKER */
-.file-box {
+.upload {
   margin-top: 15px;
 }
-.file-btn {
-  width: 100%;
-  padding: 16px;
-  border-radius: 14px;
-  background: #1db954;
-  color: black;
-  font-weight: bold;
+.upload label {
+  display: block;
+  background: rgba(255,255,255,0.05);
+  padding: 14px;
+  border-radius: 15px;
   text-align: center;
+  backdrop-filter: blur(10px);
 }
-input[type="file"] {
-  display: none;
-}
-
-/* CONTROLS */
-.controls {
-  margin-top: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-}
-
-.btn {
-  width: 65px;
-  height: 65px;
-  border-radius: 50%;
-  background: #282828;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-}
-
-.play {
-  width: 85px;
-  height: 85px;
-  background: #1db954;
-  color: black;
-  font-size: 30px;
-}
+.upload input { display: none; }
 
 /* PROGRESS */
 .progress {
@@ -86,9 +60,38 @@ input[type="file"] {
   margin-top: 20px;
 }
 
-/* TOGGLE SWITCH */
-.toggle-row {
-  margin-top: 20px;
+/* CONTROLS */
+.controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+  margin-top: 25px;
+}
+
+.btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.play {
+  width: 80px;
+  height: 80px;
+  background: #1db954;
+  color: black;
+  font-size: 28px;
+}
+
+/* TOGGLE */
+.setting {
+  margin-top: 25px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -96,86 +99,82 @@ input[type="file"] {
 
 .switch {
   position: relative;
-  width: 50px;
+  width: 52px;
   height: 28px;
 }
-.switch input {
-  display: none;
-}
+.switch input { display: none; }
+
 .slider {
   position: absolute;
-  cursor: pointer;
-  background: #555;
+  background: #444;
   border-radius: 30px;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  transition: 0.3s;
+  top:0;left:0;right:0;bottom:0;
 }
 .slider:before {
-  content: "";
-  position: absolute;
-  height: 22px;
-  width: 22px;
-  left: 3px;
-  bottom: 3px;
-  background: white;
-  border-radius: 50%;
-  transition: 0.3s;
+  content:"";
+  position:absolute;
+  width:22px;height:22px;
+  left:3px;bottom:3px;
+  background:white;
+  border-radius:50%;
+  transition:0.3s;
 }
+
 input:checked + .slider {
-  background: #1db954;
+  background:#1db954;
 }
 input:checked + .slider:before {
-  transform: translateX(22px);
+  transform: translateX(24px);
 }
 
 /* VISUALIZER */
 canvas {
   width: 100%;
-  height: 160px;
+  height: 120px;
   margin-top: 20px;
+}
+
+/* BOTTOM SAFE SPACE */
+.bottom-space {
+  height: 30px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="top">
 
   <div class="art" id="art">🎵</div>
 
-  <div class="title" id="title">No audio selected</div>
+  <div class="title" id="title">Select a track</div>
 
-  <!-- FILE PICKER -->
-  <div class="file-box">
-    <label class="file-btn">
-      Select Audio
+  <div class="upload">
+    <label>
+      Choose Audio
       <input type="file" id="file" accept="audio/*">
     </label>
   </div>
 
-  <!-- PROGRESS -->
-  <input type="range" class="progress" id="progress" value="0">
+  <input type="range" id="progress" class="progress" value="0">
 
-  <!-- CONTROLS -->
   <div class="controls">
     <div class="btn" onclick="seek(-10)">⏪</div>
-    <div class="btn play" onclick="togglePlay()" id="playBtn">▶</div>
+    <div class="btn play" id="playBtn" onclick="togglePlay()">▶</div>
     <div class="btn" onclick="seek(10)">⏩</div>
   </div>
 
-  <!-- TOGGLE -->
-  <div class="toggle-row">
+  <div class="setting">
     <span>Vibration</span>
     <label class="switch">
-      <input type="checkbox" id="vibeSwitch" checked>
+      <input type="checkbox" id="vibe" checked>
       <span class="slider"></span>
     </label>
   </div>
 
   <canvas id="viz"></canvas>
+
+  <div class="bottom-space"></div>
 
 </div>
 
@@ -185,96 +184,91 @@ canvas {
 let audio = document.getElementById("audio");
 let playBtn = document.getElementById("playBtn");
 let progress = document.getElementById("progress");
-let vibeSwitch = document.getElementById("vibeSwitch");
+let vibe = document.getElementById("vibe");
 
-let ctx, analyser, dataArray, bufferLength;
+let ctx, analyser, dataArray;
 let audioCtx;
-let isPlaying = false;
+let playing = false;
 
-/* FIXED FILE PICKER */
+/* FILE */
 document.getElementById("file").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (file) {
-    audio.src = URL.createObjectURL(file);
-    document.getElementById("title").innerText = file.name;
-  }
+  let file = e.target.files[0];
+  if (!file) return;
+
+  audio.src = URL.createObjectURL(file);
+  document.getElementById("title").innerText = file.name;
 });
 
 /* SETUP */
-function setup() {
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function setup(){
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   analyser = audioCtx.createAnalyser();
 
-  const src = audioCtx.createMediaElementSource(audio);
+  let src = audioCtx.createMediaElementSource(audio);
   src.connect(analyser);
   analyser.connect(audioCtx.destination);
 
   analyser.fftSize = 128;
-  bufferLength = analyser.frequencyBinCount;
-  dataArray = new Uint8Array(bufferLength);
+  dataArray = new Uint8Array(analyser.frequencyBinCount);
 }
 
-/* PLAY / PAUSE */
-function togglePlay() {
-  if (!audio.src) return;
+/* PLAY */
+function togglePlay(){
+  if(!audio.src) return;
 
-  if (!audioCtx) setup();
+  if(!audioCtx) setup();
 
-  if (audio.paused) {
+  if(audio.paused){
     audio.play();
-    playBtn.innerText = "❚❚";
-    isPlaying = true;
-    animate();
+    playBtn.innerText="❚❚";
+    playing=true;
+    loop();
   } else {
     audio.pause();
-    playBtn.innerText = "▶";
-    isPlaying = false;
+    playBtn.innerText="▶";
+    playing=false;
   }
 }
 
 /* SEEK */
-function seek(sec) {
-  audio.currentTime += sec;
-}
+function seek(s){ audio.currentTime+=s; }
 
 /* PROGRESS */
-audio.ontimeupdate = () => {
-  progress.value = (audio.currentTime / audio.duration) * 100 || 0;
+audio.ontimeupdate=()=>{
+  progress.value=(audio.currentTime/audio.duration)*100||0;
 };
 
-progress.oninput = () => {
-  audio.currentTime = (progress.value / 100) * audio.duration;
+progress.oninput=()=>{
+  audio.currentTime=(progress.value/100)*audio.duration;
 };
 
-/* VISUALIZER */
-const canvas = document.getElementById("viz");
-const c = canvas.getContext("2d");
-canvas.width = window.innerWidth;
-canvas.height = 160;
+/* VISUAL + VIBRATION */
+const canvas=document.getElementById("viz");
+const c=canvas.getContext("2d");
+canvas.width=window.innerWidth;
 
-function animate() {
-  if (!isPlaying) return;
+function loop(){
+  if(!playing) return;
 
-  requestAnimationFrame(animate);
+  requestAnimationFrame(loop);
 
   analyser.getByteFrequencyData(dataArray);
-  c.clearRect(0, 0, canvas.width, canvas.height);
+  c.clearRect(0,0,canvas.width,120);
 
-  let barWidth = canvas.width / bufferLength;
-  let sum = 0;
+  let w=canvas.width/dataArray.length;
+  let sum=0;
 
-  for (let i = 0; i < bufferLength; i++) {
-    let val = dataArray[i];
-    sum += val;
-
-    c.fillStyle = `rgb(${val},200,120)`;
-    c.fillRect(i * barWidth, canvas.height - val, barWidth - 2, val);
+  for(let i=0;i<dataArray.length;i++){
+    let v=dataArray[i];
+    sum+=v;
+    c.fillStyle=`rgb(${v},200,150)`;
+    c.fillRect(i*w,120-v,w-2,v);
   }
 
-  let avg = sum / bufferLength;
+  let avg=sum/dataArray.length;
 
-  if (vibeSwitch.checked && navigator.vibrate) {
-    navigator.vibrate(Math.min(120, avg));
+  if(vibe.checked && navigator.vibrate){
+    navigator.vibrate(Math.min(100,avg));
   }
 }
 </script>
