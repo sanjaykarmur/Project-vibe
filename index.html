@@ -185,7 +185,8 @@ let audio = document.getElementById("audio");
 let playBtn = document.getElementById("playBtn");
 let progress = document.getElementById("progress");
 let vibe = document.getElementById("vibe");
-
+let lastBeat = 0;
+  
 let ctx, analyser, dataArray;
 let audioCtx;
 let playing = false;
@@ -265,11 +266,45 @@ function loop(){
     c.fillRect(i*w,120-v,w-2,v);
   }
 
-  let avg=sum/dataArray.length;
+let threshold = 160; // adjust sensitivity
 
-  if(vibe.checked && navigator.vibrate){
-    navigator.vibrate(Math.min(100,avg));
+function loop(){
+  if(!playing) return;
+
+  requestAnimationFrame(loop);
+
+  analyser.getByteFrequencyData(dataArray);
+  c.clearRect(0,0,canvas.width,120);
+
+  let w = canvas.width / dataArray.length;
+
+  // 🎨 draw bars
+  for(let i=0;i<dataArray.length;i++){
+    let v = dataArray[i];
+    c.fillStyle = `rgb(${v},200,150)`;
+    c.fillRect(i*w,120-v,w-2,v);
   }
+
+  // 🎧 BASS DETECTION (first ~20 bins = low freq)
+  let bass = 0;
+  for(let i = 0; i < 20; i++){
+    bass += dataArray[i];
+  }
+  bass = bass / 20;
+
+  let now = Date.now();
+
+  // 🔥 BEAT DETECTION (spike + cooldown)
+  if (
+    vibe.checked &&
+    navigator.vibrate &&
+    bass > threshold &&
+    now - lastBeat > 120   // cooldown (ms)
+  ) {
+    navigator.vibrate(60); // short punch vibration
+    lastBeat = now;
+  }
+}
 }
 </script>
 
