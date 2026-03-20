@@ -1,64 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Music Vibrator</title>
+<meta charset="UTF-8">
+<title>Music Vibe Pro</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: black;
+    color: white;
+    text-align: center;
+  }
+
+  h1 {
+    margin-top: 10px;
+  }
+
+  #controls {
+    margin: 15px;
+  }
+
+  button, input {
+    margin: 5px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+  }
+
+  button {
+    background: #00ffcc;
+    color: black;
+    font-weight: bold;
+  }
+
+  canvas {
+    width: 100%;
+    height: 200px;
+    background: black;
+  }
+
+  #glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: background 0.1s;
+  }
+</style>
 </head>
+
 <body>
-  <h2>Music Vibration Demo</h2>
-  <input type="file" id="audioFile" accept="audio/*">
-  <button onclick="start()">Start</button>
 
-  <audio id="audio" controls></audio>
+<h1>🎵 Music Vibe Pro</h1>
 
-  <script>
-    let audioContext, analyser, source, dataArray;
+<div id="controls">
+  <input type="file" id="audioFile" accept="audio/*"><br>
 
-    const audio = document.getElementById("audio");
-    const fileInput = document.getElementById("audioFile");
+  <button onclick="play()">Play</button>
+  <button onclick="pause()">Pause</button>
+  <button onclick="stop()">Stop</button><br>
 
-    fileInput.addEventListener("change", function() {
-      const file = this.files[0];
-      if (file) {
-        audio.src = URL.createObjectURL(file);
-      }
-    });
+  Volume: <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
+  Sensitivity: <input type="range" id="sensitivity" min="1" max="5" value="2"><br>
 
-    function start() {
-      audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      analyser = audioContext.createAnalyser();
+  <label>
+    <input type="checkbox" id="bassOnly"> Bass Only Vibration
+  </label>
+</div>
 
-      source = audioContext.createMediaElementSource(audio);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
+<canvas id="visualizer"></canvas>
+<div id="glow"></div>
 
-      analyser.fftSize = 256;
-      const bufferLength = analyser.frequencyBinCount;
-      dataArray = new Uint8Array(bufferLength);
+<audio id="audio" controls style="width:90%"></audio>
 
-      audio.play();
-      vibrateLoop();
-    }
+<script>
+let audioCtx, analyser, source, dataArray, bufferLength;
+const audio = document.getElementById("audio");
+const canvas = document.getElementById("visualizer");
+const ctx = canvas.getContext("2d");
 
-    function vibrateLoop() {
-      analyser.getByteFrequencyData(dataArray);
+canvas.width = window.innerWidth;
+canvas.height = 200;
 
-      let sum = 0;
-      for (let i = 0; i < dataArray.length; i++) {
-        sum += dataArray[i];
-      }
+document.getElementById("audioFile").addEventListener("change", function() {
+  const file = this.files[0];
+  if (file) {
+    audio.src = URL.createObjectURL(file);
+  }
+});
 
-      let avg = sum / dataArray.length;
+function setupAudio() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = audioCtx.createAnalyser();
 
-      // Convert sound intensity to vibration duration
-      let vibrationTime = Math.min(200, avg);
+  source = audioCtx.createMediaElementSource(audio);
+  source.connect(analyser);
+  analyser.connect(audioCtx.destination);
 
-      if (navigator.vibrate) {
-        navigator.vibrate(vibrationTime);
-      }
+  analyser.fftSize = 256;
+  bufferLength = analyser.frequencyBinCount;
+  dataArray = new Uint8Array(bufferLength);
+}
 
-      requestAnimationFrame(vibrateLoop);
-    }
-  </script>
+function play() {
+  if (!audioCtx) setupAudio();
+  audio.play();
+  animate();
+}
+
+function pause() {
+  audio.pause();
+}
+
+function stop() {
+  audio.pause();
+  audio.currentTime = 0;
+}
+
+document.getElementById("volume").oninput = (e) => {
+  audio.volume = e.target.value;
+};
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  analyser.getByteFrequencyData(dataArray);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let barWidth = (canvas.width / bufferLength) * 2.5;
+  let x = 0;
+
+  let sum = 0;
+  let bassSum = 0;
+
+  for (let i = 0; i < bufferLength; i++) {
+    let barHeight = dataArray[i];
+
+    sum += barHeight;
+
+    if (i < 20) bassSum += barHeight;
+
+    ctx.fillStyle = "rgb(" + (barHeight + 100) + ",50,200)";
+    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+
+    x += barWidth + 1;
+  }
+
+  let avg = sum / bufferLength;
+  let bassAvg = bassSum / 20;
+
+  let sensitivity = document.getElementById("sensitivity").value;
+  let useBass = document.getElementById("bassOnly").checked;
+
+  let intensity = useBass ? bassAvg : avg;
+  let vibrationTime = Math.min(200, intensity * sensitivity / 2);
+
+  if (navigator.vibrate) {
+    navigator.vibrate(vibrationTime);
+  }
+
+  // Glow effect
+  document.getElementById("glow").style.background =
+    "radial-gradient(circle, rgba(0,255,200," + (intensity / 255) + "), transparent)";
+}
+</script>
+
 </body>
 </html>
