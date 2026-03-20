@@ -2,170 +2,234 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Music Vibe Pro</title>
+<title>Vibe Player Mobile</title>
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: black;
-    color: white;
-    text-align: center;
-  }
+body {
+  margin: 0;
+  font-family: system-ui;
+  background: #0a0a0a;
+  color: white;
+  text-align: center;
+}
 
-  h1 {
-    margin-top: 10px;
-  }
+/* HEADER */
+h2 {
+  margin: 15px 0 5px;
+}
 
-  #controls {
-    margin: 15px;
-  }
+/* FILE PICKER */
+.upload {
+  margin: 15px;
+}
+.upload label {
+  display: inline-block;
+  padding: 12px 18px;
+  border-radius: 15px;
+  background: #1f1f1f;
+  border: 1px solid #333;
+}
+.upload input {
+  display: none;
+}
 
-  button, input {
-    margin: 5px;
-    padding: 10px;
-    border-radius: 10px;
-    border: none;
-  }
+/* PLAYER */
+.player {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
 
-  button {
-    background: #00ffcc;
-    color: black;
-    font-weight: bold;
-  }
+.btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #1f1f1f;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
 
-  canvas {
-    width: 100%;
-    height: 200px;
-    background: black;
-  }
+.btn:active {
+  transform: scale(0.95);
+}
 
-  #glow {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    transition: background 0.1s;
-  }
+/* MAIN BUTTON */
+.play {
+  width: 75px;
+  height: 75px;
+  font-size: 26px;
+  background: #00ffc3;
+  color: black;
+}
+
+/* TOGGLE */
+.toggle {
+  margin: 10px;
+}
+.toggle button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #1f1f1f;
+  color: white;
+  border: none;
+}
+
+/* CANVAS */
+canvas {
+  width: 100%;
+  height: 180px;
+  margin-top: 10px;
+}
+
+/* PROGRESS */
+.progress {
+  width: 90%;
+  margin: auto;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎵 Music Vibe Pro</h1>
+<h2>🎵 Vibe Player</h2>
 
-<div id="controls">
-  <input type="file" id="audioFile" accept="audio/*"><br>
-
-  <button onclick="play()">Play</button>
-  <button onclick="pause()">Pause</button>
-  <button onclick="stop()">Stop</button><br>
-
-  Volume: <input type="range" id="volume" min="0" max="1" step="0.01" value="1">
-  Sensitivity: <input type="range" id="sensitivity" min="1" max="5" value="2"><br>
-
-  <label>
-    <input type="checkbox" id="bassOnly"> Bass Only Vibration
-  </label>
+<div class="upload">
+  <label>📂 Select Audio</label>
+  <input type="file" id="file" accept="audio/*">
 </div>
 
-<canvas id="visualizer"></canvas>
-<div id="glow"></div>
+<div class="player">
+  <div class="btn" onclick="seek(-10)">⏪</div>
+  <div class="btn play" onclick="togglePlay()" id="playBtn">▶️</div>
+  <div class="btn" onclick="seek(10)">⏩</div>
+</div>
 
-<audio id="audio" controls style="width:90%"></audio>
+<div class="toggle">
+  <button id="vibeToggle" onclick="toggleVibration()">Vibration: ON</button>
+</div>
+
+<input type="range" class="progress" id="progress" value="0">
+
+<canvas id="viz"></canvas>
+
+<audio id="audio"></audio>
 
 <script>
-let audioCtx, analyser, source, dataArray, bufferLength;
-const audio = document.getElementById("audio");
-const canvas = document.getElementById("visualizer");
-const ctx = canvas.getContext("2d");
+let audio = document.getElementById("audio");
+let playBtn = document.getElementById("playBtn");
+let progress = document.getElementById("progress");
+let vibeBtn = document.getElementById("vibeToggle");
 
-canvas.width = window.innerWidth;
-canvas.height = 200;
+let ctx, analyser, dataArray, bufferLength;
+let audioCtx;
 
-document.getElementById("audioFile").addEventListener("change", function() {
-  const file = this.files[0];
+let vibrationEnabled = true;
+let isPlaying = false;
+
+/* FILE LOAD */
+document.getElementById("file").addEventListener("change", e => {
+  const file = e.target.files[0];
   if (file) {
     audio.src = URL.createObjectURL(file);
   }
 });
 
-function setupAudio() {
+/* AUDIO SETUP */
+function setup() {
   audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   analyser = audioCtx.createAnalyser();
 
-  source = audioCtx.createMediaElementSource(audio);
-  source.connect(analyser);
+  const src = audioCtx.createMediaElementSource(audio);
+  src.connect(analyser);
   analyser.connect(audioCtx.destination);
 
-  analyser.fftSize = 256;
+  analyser.fftSize = 128;
   bufferLength = analyser.frequencyBinCount;
   dataArray = new Uint8Array(bufferLength);
 }
 
-function play() {
-  if (!audioCtx) setupAudio();
-  audio.play();
-  animate();
+/* PLAY / PAUSE */
+function togglePlay() {
+  if (!audioCtx) setup();
+
+  if (audio.paused) {
+    audio.play();
+    playBtn.innerHTML = "⏸️";
+    isPlaying = true;
+
+    // Disable toggle while playing
+    vibeBtn.disabled = true;
+    vibeBtn.style.opacity = 0.5;
+
+    animate();
+  } else {
+    audio.pause();
+    playBtn.innerHTML = "▶️";
+    isPlaying = false;
+
+    // Enable toggle again
+    vibeBtn.disabled = false;
+    vibeBtn.style.opacity = 1;
+  }
 }
 
-function pause() {
-  audio.pause();
+/* SEEK */
+function seek(sec) {
+  audio.currentTime += sec;
 }
 
-function stop() {
-  audio.pause();
-  audio.currentTime = 0;
+/* VIBRATION TOGGLE */
+function toggleVibration() {
+  vibrationEnabled = !vibrationEnabled;
+  vibeBtn.innerText = "Vibration: " + (vibrationEnabled ? "ON" : "OFF");
 }
 
-document.getElementById("volume").oninput = (e) => {
-  audio.volume = e.target.value;
+/* PROGRESS */
+audio.ontimeupdate = () => {
+  progress.value = (audio.currentTime / audio.duration) * 100 || 0;
 };
 
+progress.oninput = () => {
+  audio.currentTime = (progress.value / 100) * audio.duration;
+};
+
+/* VISUALIZER */
+const canvas = document.getElementById("viz");
+const c = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = 180;
+
 function animate() {
+  if (!isPlaying) return;
+
   requestAnimationFrame(animate);
 
   analyser.getByteFrequencyData(dataArray);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  c.clearRect(0, 0, canvas.width, canvas.height);
 
-  let barWidth = (canvas.width / bufferLength) * 2.5;
-  let x = 0;
+  let barWidth = canvas.width / bufferLength;
 
   let sum = 0;
-  let bassSum = 0;
 
   for (let i = 0; i < bufferLength; i++) {
-    let barHeight = dataArray[i];
+    let val = dataArray[i];
+    sum += val;
 
-    sum += barHeight;
-
-    if (i < 20) bassSum += barHeight;
-
-    ctx.fillStyle = "rgb(" + (barHeight + 100) + ",50,200)";
-    ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
-    x += barWidth + 1;
+    c.fillStyle = `rgb(${val+50}, 200, 255)`;
+    c.fillRect(i * barWidth, canvas.height - val, barWidth - 2, val);
   }
 
   let avg = sum / bufferLength;
-  let bassAvg = bassSum / 20;
 
-  let sensitivity = document.getElementById("sensitivity").value;
-  let useBass = document.getElementById("bassOnly").checked;
-
-  let intensity = useBass ? bassAvg : avg;
-  let vibrationTime = Math.min(200, intensity * sensitivity / 2);
-
-  if (navigator.vibrate) {
-    navigator.vibrate(vibrationTime);
+  if (vibrationEnabled && navigator.vibrate) {
+    let time = Math.min(120, avg);
+    navigator.vibrate(time);
   }
-
-  // Glow effect
-  document.getElementById("glow").style.background =
-    "radial-gradient(circle, rgba(0,255,200," + (intensity / 255) + "), transparent)";
 }
 </script>
 
