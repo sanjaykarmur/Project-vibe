@@ -7,204 +7,45 @@
 
 <style>
 *{box-sizing:border-box;}
-body{
-  margin:0;
-  font-family:system-ui;
-  background:#0d0d0d;
-  color:white;
-}
-
-/* CONTAINER */
+body{margin:0;font-family:system-ui;background:#0d0d0d;color:white;}
 .container{padding:20px;}
-
-/* ART */
 .art{
-  width:100%;
-  height:300px;
-  border-radius:25px;
+  width:100%;height:300px;border-radius:25px;
   background:linear-gradient(145deg,#1db954,#0d0d0d);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   font-size:50px;
-  box-shadow:0 10px 40px rgba(0,255,150,0.3);
 }
-
-/* TITLE */
-.title{
-  margin-top:15px;
-  font-size:18px;
-}
-
-/* FILE */
-.upload{
-  margin-top:15px;
-}
-.upload label{
-  display:block;
-  padding:14px;
-  border-radius:15px;
-  background:#1f1f1f;
-  text-align:center;
-}
+.title{margin-top:15px;}
+.upload label{display:block;padding:14px;border-radius:15px;background:#1f1f1f;text-align:center;}
 .upload input{display:none;}
-
-/* PROGRESS */
-.progress{
-  width:100%;
-  margin-top:20px;
-}
-
-/* CONTROLS */
-.controls{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:25px;
-  margin-top:25px;
-}
-.btn{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  background:#222;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:22px;
-}
-.play{
-  width:80px;
-  height:80px;
-  background:#1db954;
-  color:black;
-  font-size:28px;
-}
-
-/* TOGGLE */
-.setting{
-  margin-top:25px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-.switch{
-  position:relative;
-  width:52px;
-  height:28px;
-}
+.progress{width:100%;margin-top:20px;}
+.controls{display:flex;justify-content:center;gap:25px;margin-top:25px;}
+.btn{width:60px;height:60px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;}
+.play{width:80px;height:80px;background:#1db954;color:black;}
+.setting{margin-top:25px;display:flex;justify-content:space-between;}
+.switch{position:relative;width:52px;height:28px;}
 .switch input{display:none;}
-.slider{
-  position:absolute;
-  background:#444;
-  border-radius:30px;
-  inset:0;
-}
-.slider:before{
-  content:"";
-  position:absolute;
-  width:22px;height:22px;
-  left:3px;bottom:3px;
-  background:white;
-  border-radius:50%;
-  transition:0.3s;
-}
+.slider{position:absolute;inset:0;background:#444;border-radius:30px;}
+.slider:before{content:"";position:absolute;width:22px;height:22px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s;}
 input:checked + .slider{background:#1db954;}
 input:checked + .slider:before{transform:translateX(24px);}
-
-/* VISUAL */
-canvas{
-  width:100%;
-  height:120px;
-  margin-top:20px;
-}
-
-/* POPUP */
-#popup{
-  position:fixed; inset:0;
-  background:rgba(0,0,0,0.8);
-  display:flex; align-items:center; justify-content:center;
-  z-index:999;
-}
-.popup-box{
-  width:90%;
-  background:#1a1a1a;
-  padding:20px;
-  border-radius:20px;
-}
-.popup-buttons{
-  display:flex;
-  gap:4%;
-  margin-top:15px;
-}
-.popup-buttons button{
-  width:48%;
-  padding:12px;
-}
-.answer-grid{
-  display:grid;
-  gap:10px;
-}
-.continue{
-  width:100%;
-  margin-top:15px;
-  padding:14px;
-  background:#1db954;
-  border:none;
-  border-radius:12px;
-}
+canvas{width:100%;height:120px;margin-top:20px;}
 </style>
 </head>
 
 <body>
 
-<!-- POPUP -->
-<div id="popup">
-  <div class="popup-box">
-
-    <div id="step1">
-      <h3>Check Haptic Support</h3>
-      <p>Do you want to test your phone's vibration?</p>
-
-      <div class="popup-buttons">
-        <button onclick="closePopup()">No, thanks</button>
-        <button onclick="startTest()">Check</button>
-      </div>
-    </div>
-
-    <div id="step2" style="display:none;">
-      <p>How many times did you feel vibrations?</p>
-
-      <div class="answer-grid">
-        <button onclick="answer(0)">None</button>
-        <button onclick="answer(1)">1</button>
-        <button onclick="answer(2)">2</button>
-        <button onclick="answer(3)">3</button>
-      </div>
-
-      <p id="result" style="margin-top:10px;"></p>
-
-      <button class="continue" onclick="closePopup()">Continue</button>
-    </div>
-
-  </div>
-</div>
-
-<!-- MAIN -->
 <div class="container">
-
   <div class="art">🎵</div>
-
   <div class="title" id="title">Select a track</div>
 
   <div class="upload">
-    <label>
-      Choose Audio
+    <label>Choose Audio
       <input type="file" id="file" accept="audio/*">
     </label>
   </div>
 
-  <input type="range" id="progress" class="progress" value="0">
+  <input type="range" id="progress" class="progress">
 
   <div class="controls">
     <div class="btn" onclick="seek(-10)">⏪</div>
@@ -221,7 +62,6 @@ canvas{
   </div>
 
   <canvas id="viz"></canvas>
-
 </div>
 
 <audio id="audio"></audio>
@@ -235,15 +75,13 @@ let vibe=document.getElementById("vibe");
 let analyser,dataArray,audioCtx;
 let playing=false;
 
-/* FILE */
 document.getElementById("file").addEventListener("change",e=>{
-  let file=e.target.files[0];
-  if(!file)return;
-  audio.src=URL.createObjectURL(file);
-  document.getElementById("title").innerText=file.name;
+  let f=e.target.files[0];
+  if(!f)return;
+  audio.src=URL.createObjectURL(f);
+  title.innerText=f.name;
 });
 
-/* SETUP */
 function setup(){
   audioCtx=new (window.AudioContext||window.webkitAudioContext)();
   analyser=audioCtx.createAnalyser();
@@ -254,7 +92,6 @@ function setup(){
   dataArray=new Uint8Array(analyser.frequencyBinCount);
 }
 
-/* PLAY */
 function togglePlay(){
   if(!audio.src)return;
   if(!audioCtx)setup();
@@ -271,10 +108,8 @@ function togglePlay(){
   }
 }
 
-/* SEEK */
 function seek(s){audio.currentTime+=s;}
 
-/* PROGRESS */
 audio.ontimeupdate=()=>{
   progress.value=(audio.currentTime/audio.duration)*100||0;
 };
@@ -282,31 +117,11 @@ progress.oninput=()=>{
   audio.currentTime=(progress.value/100)*audio.duration;
 };
 
-/* POPUP */
-function closePopup(){
-  document.getElementById("popup").style.display="none";
-}
-function startTest(){
-  document.getElementById("step1").style.display="none";
-  document.getElementById("step2").style.display="block";
-  if(navigator.vibrate){
-    navigator.vibrate([300,150,300]);
-  }
-}
-function answer(val){
-  let msg="";
-  if(val===0) msg="Your device does not support vibration API";
-  else if(val===1) msg="Vibration API working but not accurate";
-  else if(val===2) msg="Vibration API is working fine";
-  else msg="Inconsistent vibration detected";
-  document.getElementById("result").innerText=msg;
-}
-
-/* VISUAL + ADAPTIVE VIBRATION */
 const canvas=document.getElementById("viz");
 const c=canvas.getContext("2d");
 canvas.width=window.innerWidth;
 
+/* 🔥 STABLE ENGINE */
 let lastBeat=0;
 let prevBass=0;
 let smoothBass=0;
@@ -331,10 +146,10 @@ function loop(){
 
   bass/=20;
 
-  smoothBass = smoothBass*0.7 + bass*0.3;
+  smoothBass = smoothBass*0.6 + bass*0.4;
 
   let delta = smoothBass - prevBass;
-  let threshold = 18 + smoothBass*0.05;
+  let threshold = 12 + smoothBass*0.03;
 
   let now = performance.now();
 
@@ -342,9 +157,15 @@ function loop(){
     vibe.checked &&
     navigator.vibrate &&
     delta > threshold &&
-    now - lastBeat > 80
+    now - lastBeat > 120
   ){
-    navigator.vibrate(45);
+    // 🔥 PATTERN vibration (feels stronger & avoids suppression)
+    let strength = Math.min(120, smoothBass);
+
+    navigator.vibrate([
+      strength, 40, strength/2
+    ]);
+
     lastBeat = now;
   }
 
